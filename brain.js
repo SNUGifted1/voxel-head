@@ -1,22 +1,8 @@
-var PORT = '';
+var PORT = '5002';
 var HOST = '127.0.0.1';
 
 var dgram = require('dgram');
 var server = dgram.createSocket('udp4');
-
-const readline = require('readline');
-
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-});
-
-rl.question('Your port is: ',(answer) =>{
-	console.log('is: ${answer}');
-	//PORT = ${answer};
-
-	rl.close();
-});
 
 server.on('listening', function () {
     var address = server.address();
@@ -30,9 +16,6 @@ server.on('message', function (message, remote) {
       return message;
     }
     */
-    c
-
-
 });
 
 server.bind(PORT, HOST);
