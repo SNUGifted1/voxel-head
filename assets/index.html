@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
+		
+		<title>Voxel Warriors</title>
+		
+		<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAxlBMVEUAAABOWZ5BTZhCTZhHUpt7g7d5gbZ5grZ5grZ6grZsda9tdq9tdrBtd7Bsdq9ye7Jye7JzfLN0fbNxerJdaKdeaadfaahfaqhha6ldZ6dfaahfaqhjbat/h7mAh7mFjLx8hLh3gLV6grZ6grdfaahgaqlibKpha6ljbapRXKBSXKBUX6JTXqFSXaH///+uuNXEzOHx9Pvb4O+5wtv8/f+zvdi+x97m6vXr7/edqcujrs6/x97V2+vg5fGNmcKXo8jJ0eXQ1ucIdJUyAAAALnRSTlMACR0dI1BRUVJSiIiIiIi8vb29vdbW1tbW4uLi4uzs7Ozs7Ozx8fHx8f39/f39FstVagAAALZJREFUeNptz8cWgkAMBVAYR8Xee1fAnoQBBOz+/0+ZgaVmlXcX7ySG8TumKLV3x6PbsoSZZlkbLq7JlWb9itQiqtMn+vEDIn9cFgzWgBDD8AHB5dazGFqzAHk88PCzbDK45KUZgjuSw3BS4N85A1xQHTRE4PlxCqHaM2yJdyKKAGKydemcQde8AVYdhmKfMsCAugV9WGXCohAVjdLDTFnvremWvDbdssyeEYWmc97bjXzO/PP7F9bvG7XExUxsAAAAAElFTkSuQmCC" />
+		
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+		
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+		
+		<script type="text/javascript" src="/index.js"></script>
+	</head>
+	<body style="overflow:hidden;">
+		<div style="display:none;">
+			<img id="idCharacterGreen" src="/images/characterGreen.png">
+			<img id="idCharacterRed" src="/images/characterRed.png">
+			<img id="idCharacterBlue" src="/images/characterBlue.png">
+
+			<img id="idEntityFlagRed" src="/images/entityFlagRed.png">
+			<img id="idEntityFlagBlue" src="/images/entityFlagBlue.png">
+			<img id="idEntityPickaxe" src="/images/entityPickaxe.png">
+			<img id="idEntitySword" src="/images/entitySword.png">
+			<img id="idEntityBow" src="/images/entityBow.png">
+			<img id="idEntityArrow" src="/images/entityArrow.png">
+		</div>
+		
+		<div id="idCrosshair" style="position:fixed; left:50%; top:50%; width:32px; height:32px; margin:-16px 0px 0px -16px;">
+			<img src="/images/guiCrosshair.png">
+		</div>
+		
+		<div id="idHealth" style="position:fixed; left:0px; right:0px; bottom:0px; height:0.75%; background-color:#B94200;">
+			<div style="position:absolute; left:0px; right:0px; height:100%; background-color:#77B900;">
+			
+			</div>
+		</div>
+		
+		<div id="idWestside" style="position:fixed; left:0px; top:0px; bottom:0px; width:480px; padding:15px;">
+			<div class="panel panel-default modal-content">
+				<div class="panel-heading">
+					Message of the Day
+				</div>
+				<div class="panel-body">
+					<div class="form-control" style="height:200px; overflow-y:scroll; font-family:Courier;">
+						{{objectGameserver.strLoginMotd}}
+					</div>
+				</div>
+			</div>
+			
+			<div class="panel panel-default modal-content">
+				<div class="panel-heading">
+					Messagebox
+				</div>
+				<div class="panel-body">
+					<div class="form-control" id="idMessagebox_Log" style="height:200px; overflow-y:scroll;"></div>
+					
+					<div style="height:15px;"></div>
+					
+					<input class="form-control" id="idMessagebox_Chat" type="text" placeholder="Message" />
+				</div>
+			</div>
+		</div>
+		
+		<div id="idEastside" style="position:fixed; right:0px; top:0px; bottom:0px; width:480px; padding:15px;">
+			<div class="panel panel-default modal-content">
+				<div class="panel-heading">
+					Server
+				</div>
+				<div class="panel-body">
+					<table class="table" style="margin:0px;">
+						<tr>
+							<th style="width:1%; border:none; text-align:right; white-space:nowrap;">
+								Ping:
+							</th>
+							<td style="border:none;">
+								<span id="idServer_Ping"></span>
+							</td>
+						</tr>
+						<tr>
+							<th style="text-align:right; white-space:nowrap;">
+								World:
+							</th>
+							<td>
+								<span id="idServer_World"></span>
+							</td>
+						</tr>
+						<tr>
+							<th style="text-align:right; white-space:nowrap;">
+								Phase:
+							</th>
+							<td>
+								<span id="idServer_Phase"></span>
+							</td>
+						</tr>
+						<tr>
+							<th style="text-align:right; white-space:nowrap;">
+								Players:
+							</th>
+							<td>
+								<span id="idServer_Players"></span>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			
+			<div class="panel panel-default modal-content">
+				<div class="panel-heading">
+					Red Team
+				</div>
+				<div class="panel-body">
+					<table class="table" style="margin:0px;">
+						<tr>
+							<th style="width:1%; border:none; text-align:right; white-space:nowrap;">
+								Players:
+							</th>
+							<td style="border:none;">
+								<span id="idTeamRed_Players"></span>
+							</td>
+						</tr>
+						<tr>
+							<th style="text-align:right; white-space:nowrap;">
+								Score:
+							</th>
+							<td>
+								<span id="idTeamRed_Score"></span>
+							</td>
+						</tr>
+					</table>
+					
+					<div style="height:15px;"></div>
+					
+					<table class="table" id="idTeamRed_Table" style="margin:0px;">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th width="1%">Score</th>
+								<th width="1%">Kills</th>
+								<th width="1%">Deaths</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+			
+			<div class="panel panel-default modal-content">
+				<div class="panel-heading">
+					Blue Team
+				</div>
+				<div class="panel-body">
+					<table class="table" style="margin:0px;">
+						<tr>
+							<th style="width:1%; border:none; text-align:right; white-space:nowrap;">
+								Players:
+							</th>
+							<td style="border:none;">
+								<span id="idTeamBlue_Players"></span>
+							</td>
+						</tr>
+						<tr>
+							<th style="text-align:right; white-space:nowrap;">
+								Score:
+							</th>
+							<td>
+								<span id="idTeamBlue_Score"></span>
+							</td>
+						</tr>
+					</table>
+					
+					<div style="height:15px;"></div>
+					
+					<table class="table" id="idTeamBlue_Table" style="margin:0px;">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th width="1%">Score</th>
+								<th width="1%">Kills</th>
+								<th width="1%">Deaths</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		
+		<div id="idToolbar" style="position:fixed; left:0px; right:0px; bottom:0px; height:100px; text-align:center;">
+			<div class="panel panel-default modal-content" style="display:inline-block;">
+				<div class="panel-body">
+					<div id="idPhaseBuild">
+						<a class="btn btn-default" stlye="display:inline-block;">
+							Create
+						</a>
+						
+						<a class="btn btn-default" stlye="display:inline-block;">
+							Destroy
+						</a>
+					</div>
+					
+					<div id="idPhaseCombat">
+						<a class="btn btn-default" stlye="display:inline-block;">
+							Sword
+						</a>
+						
+						<a class="btn btn-default" stlye="display:inline-block;">
+							Bow
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="idLoading" style="position:fixed; left:50%; top:50%; margin:-63px 0px 0px -63px;">
+			<div class="panel panel-default modal-content">
+				<div class="panel-body">
+					<div style="margin:32px;">
+						<img width="31" height="31" border="0" src="data:image/gif;base64,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">
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="idLogin" style="position:fixed; left:50%; top:50%; width:490px; margin:-236px 0px 0px -235px;">
+			<div class="panel panel-default modal-content">
+				<div class="panel-heading">
+					Login
+				</div>
+				<div class="panel-body">
+					<div class="alert alert-warning" id="idLogin_Message"></div>
+					
+					<table class="table" style="margin:0px;">
+						<tr>
+							<th style="width:1%; border:none; padding-top:15px; text-align:right; white-space:nowrap;">
+								Name:
+							</th>
+							<td style="border:none;">
+								<input class="form-control" id="idLogin_Name" type="text" />
+							</td>
+						</tr>
+						<tr>
+							<th style="padding-top:15px; text-align:right; white-space:nowrap;">
+								Team:
+							</th>
+							<td>
+								<select class="form-control" id="idLogin_Team">
+									<option value="teamRed">Red</option>
+									<option value="teamBlue">Blue</option>
+								</select>
+							</td>
+						</tr>
+					</table>
+					
+					<table class="table" style="margin:0px;">
+						<tr>
+							<th style="width:1%; border:none; padding-top:15px; text-align:right; white-space:nowrap;">
+								<div style="width:43px;"></div>
+							</th>
+							<td style="border:none;">
+								<a class="btn btn-primary" id="idLogin_Login">
+									Login
+								</a>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			
+			<div class="panel panel-default modal-content">
+				<div class="panel-body">
+					<div style="text-align:justify; line-height:200%;">
+						Use the <kbd>e</kbd> key in order to toggle between the game and the menu. In order to control your player, you have to click inside the world and let the game take control over your mouse. When your mouse is being locked inside the browser, use the <kbd>esc</kbd> key in order to release it again.
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	</body>
+</html>

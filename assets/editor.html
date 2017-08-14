@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
+		
+		<title>Voxel Warriors</title>
+		
+		<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAxlBMVEUAAABOWZ5BTZhCTZhHUpt7g7d5gbZ5grZ5grZ6grZsda9tdq9tdrBtd7Bsdq9ye7Jye7JzfLN0fbNxerJdaKdeaadfaahfaqhha6ldZ6dfaahfaqhjbat/h7mAh7mFjLx8hLh3gLV6grZ6grdfaahgaqlibKpha6ljbapRXKBSXKBUX6JTXqFSXaH///+uuNXEzOHx9Pvb4O+5wtv8/f+zvdi+x97m6vXr7/edqcujrs6/x97V2+vg5fGNmcKXo8jJ0eXQ1ucIdJUyAAAALnRSTlMACR0dI1BRUVJSiIiIiIi8vb29vdbW1tbW4uLi4uzs7Ozs7Ozx8fHx8f39/f39FstVagAAALZJREFUeNptz8cWgkAMBVAYR8Xee1fAnoQBBOz+/0+ZgaVmlXcX7ySG8TumKLV3x6PbsoSZZlkbLq7JlWb9itQiqtMn+vEDIn9cFgzWgBDD8AHB5dazGFqzAHk88PCzbDK45KUZgjuSw3BS4N85A1xQHTRE4PlxCqHaM2yJdyKKAGKydemcQde8AVYdhmKfMsCAugV9WGXCohAVjdLDTFnvremWvDbdssyeEYWmc97bjXzO/PP7F9bvG7XExUxsAAAAAElFTkSuQmCC" />
+		
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+		
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+		
+		<script type="text/javascript" src="/editor.js"></script>
+	</head>
+	<body style="overflow:hidden;">
+		<div style="display:none;">
+			<img id="idCharacterGreen" src="/images/characterGreen.png">
+			<img id="idCharacterRed" src="/images/characterRed.png">
+			<img id="idCharacterBlue" src="/images/characterBlue.png">
+
+			<img id="idEntityFlagRed" src="/images/entityFlagRed.png">
+			<img id="idEntityFlagBlue" src="/images/entityFlagBlue.png">
+			<img id="idEntityPickaxe" src="/images/entityPickaxe.png">
+			<img id="idEntitySword" src="/images/entitySword.png">
+			<img id="idEntityBow" src="/images/entityBow.png">
+			<img id="idEntityArrow" src="/images/entityArrow.png">
+		</div>
+		
+		<div id="idCrosshair" style="position:fixed; left:50%; top:50%; width:32px; height:32px; margin:-16px 0px 0px -16px;">
+			<img src="/images/guiCrosshair.png">
+		</div>
+		
+		<div id="idToolbar" style="position:fixed; left:0px; right:0px; bottom:0px; height:100px; text-align:center;">
+			<div class="panel panel-default modal-content" style="display:inline-block;">
+				<div class="panel-body">
+					<div id="idPhaseBuild">
+						<div id="idPhaseBuild_Chooser">
+							<select class="form-control" style="display:inline-block; width:200px;">
+								<option>Brick</option>
+								<option>Dirt</option>
+								<option>Grass</option>
+								<option>Plank</option>
+								<option>Stone</option>
+							</select>
+							
+							<select class="form-control" style="display:inline-block; width:200px;">
+								<option>Spawn Red</option>
+								<option>Spawn Blue</option>
+								<option>Flag Red</option>
+								<option>Flag Blue</option>
+								<option>Separator</option>
+							</select>
+							
+							<a class="btn btn-default" stlye="display:inline-block;">
+								Destroy
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="idWorld" style="position:fixed; left:50%; top:50%; width:490px; margin:-290px 0px 0px -245px;">
+			<div class="panel panel-default modal-content">
+				<div class="panel-body">
+					<textarea class="form-control" id="idWorld_Json" style="height:500px; overflow-y:scroll; font-family:Courier;"></textarea>
+					
+					<div style="height:15px;"></div>
+					
+					<a class="btn btn-primary" id="idWorld_Save">
+						Save
+					</a>
+					
+					<a class="btn btn-primary" id="idWorld_Load">
+						Load
+					</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
