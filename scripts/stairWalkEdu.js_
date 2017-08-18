@@ -1,0 +1,125 @@
+﻿let stairStarted = false;
+let time;
+let nowstatus = 0;
+let workingHuman;
+Constants.dblPlayerGravity[1] = -0.0001;
+let last = 2;
+let list = [];
+let allList = [];
+let goingunder = false;
+function onPlayerChat(event){
+	if (event.getMessage() === '계단 시작'){
+		event.setCanceled();
+		event.getHuman().sendMessage("[EduHelper]", "계단 교육을 시작합니다.");
+		event.getHuman().showTipMessage("[EduHelper] 계단 교육을 시작합니다.");
+		time = new Date().getTime();
+		stairStarted = true;
+		workingHuman = event.getHuman();
+	}
+	else if (event.getMessage() === '계단 중지'){
+		Server.sendMessage("[EduHelper]", "계단 교육을 중지합니다.");
+		workingHuman = undefined;
+		stairStarted = false;
+		nowstatus = 0;
+		last = 2;
+		list = [];
+		allList = [];
+		goingunder = false;
+	}
+	var data = event.getMessage().split(" ");
+	if (data[0] == "/eval"){
+		event.setCanceled = true;
+		data.splice(0, 1);
+		try{
+			eval(data.join(" "));
+		}catch(e){
+			console.log(e);
+		}
+	}
+}
+
+
+//0.5초마다 발동됨
+function onServerTick(){
+	if (workingHuman == undefined) return;
+	if (!workingHuman.isOnline()){
+		workingHuman = undefined;
+		stairStarted = false;
+		nowstatus = 0;
+		last = 2;
+		list = [];
+		allList = [];
+		goingunder = false;
+	}
+	let nowTime = Date.now();
+	if (stairStarted){
+		if (goingunder){
+			if (Math.floor(workingHuman.getPosition()[1]) == 2){
+				goingunder = false;
+				workingHuman.showTipMessage("[EduHelper] 현재 경우의 수: " + allList.length);
+			}else return;
+		}
+		if (nowstatus === 1){
+			workingHuman.setPosition([5, 3, -10]);
+		}
+		if (nowstatus === 2){
+			if (workingHuman.isOnGround()){
+				let y = Math.floor(workingHuman.getPosition()[1]);
+				if (y > last){
+					console.log(y, last);
+					if (y - last > 2){
+						workingHuman.showTipMessage("[EduHelper] 계단은 한 번에 최대 2칸만 오를 수 있습니다. 맨 아래로 내려가세요.");
+						goingunder = true;
+						return;
+					}else{
+						workingHuman.showTipMessage("[EduHelper] 현재 경우의 수: " + allList.length);
+						list.push(y);
+						last = y;
+					}
+				}
+				if (y == 5){
+					let same = false;
+					console.log("list:"+list);
+					for (let i of allList){
+						console.log("allList:"+i);
+						same = i.length == list.length;
+						for (let j in i){
+							if (i[j] != list[j]) same = false; 
+						}
+						if (same) break;
+					}
+					if (same){
+						workingHuman.showTipMessage("[EduHelper] 그 조합은 이미 했습니다. 맨 아래로 내려가세요.");
+						goingunder = true;
+					}else{
+						allList.push(list);
+						workingHuman.showTipMessage("[EduHelper] 현재 경우의 수:" + allList.length);
+						goingunder = true;
+					}
+					last = 2;
+					list = [];
+					if (allList.length === 3) workingHuman.showTipMessage("[EduHelper] 모든 경우를 다 찾았습니다!");
+				}
+			}
+		}
+		else if (nowTime - time > 3000){
+			if (nowstatus === 0){
+				workingHuman.showTipMessage("[EduHelper] 계단을 한 번에 한 칸 또는 두 칸씩 올라갈 때, 올라갈 수 있는 경우의 수를 구해 봅시다.");
+				workingHuman.setPosition([5, 3, -10]);
+				Server.setBlock([5, 2, -10], 'voxelBrick');
+				Server.setBlock([6, 2, -10], 'voxelBrick');
+				Server.setBlock([6, 3, -10], 'voxelBrick');
+				Server.setBlock([7, 2, -10], 'voxelBrick');
+				Server.setBlock([7, 3, -10], 'voxelBrick');
+				Server.setBlock([7, 4, -10], 'voxelBrick');
+				nowstatus = 1;
+				time = nowTime;
+			}else if (nowstatus === 1){
+				workingHuman.setPosition([5, 3, -10]);
+				workingHuman.showTipMessage("[EduHelper] 현재 경우의 수: 0");
+				nowstatus = 2;
+			}
+		}
+	}
+}
+

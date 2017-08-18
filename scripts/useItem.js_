@@ -1,0 +1,82 @@
+function onPlayerLogin(event){
+	if (event.isSuccessed()) console.log(event.getName() + "("+event.getTeamName()+") 님이 접속하셨습니다. 환영합니다!");
+}
+
+function onPlayerChat(event){
+	let Fucks = ["씨발", "병신", "fuck", "bitch"];
+	console.log(event.getName() + ": " + event.getMessage());
+	if (event.getMessage().indexOf("fuck") !== -1){
+		event.setCanceled();
+		event.setCanceledMessage("욕을 하셔서 체력이 10 줄어들었습니다.");
+		event.setCanceledSender("[ChatManager]");
+		var player = new Human().setHumanIdent(event.getPlayerIdent());
+		player.setHealth(player.getHealth() - 10);
+	}
+}
+let id = 0;
+/*
+boolCollisionBottom:true
+boolCollisionSide:false
+boolCollisionTop:false
+dblAcceleration:Array[3]
+dblFriction:Array[3]
+dblGravity:Array[3]
+dblMaxvel:Array[3]
+dblPosition:Array[3]
+dblRotation:Array[3]
+dblSize:Array[3]
+dblVerlet:Array[3]
+intDeaths:0
+intHealth:90
+intJumpcount:1
+intKills:0
+intScore:0
+intWalk:0
+intWeapon:0
+strEntity:"entityPickaxe"
+strIdent:"1"
+strName:"A"
+strTeam:"teamBlue"
+ */
+function onBlockPlace(event){
+	if (Math.floor(Math.random() * 2) === 0){
+		event.setBlockType("voxelBrick");
+	}
+	console.log(event.getHuman().getName() + " 설치: " + event.getBlockType() + "(" + event.getPosition().join(", ") + ")");
+	let position = [];
+	for (let i of event.getPosition()) position.push(i);
+	position[1] += 5;
+	Socket.objectServer.emit('addMesh', {
+		'size': [2, 2, 2],
+		'position': position,
+		'Material': {
+			color: 0xffff00,
+			wireframe: true,
+			wireframeLinewidth: 3,
+			transparent: true,
+			opacity: 1
+		},
+		'id': "Practice_" + position.join("_")
+	});
+	/*for (let x = position[0] - 1 ; x <= position[0] ; x++) for (let y = position[1] - 1 ; y <= position[1] ; y++) for (let z = position[2] - 1 ; z <= position[2]; z++){
+		Server.setBlock([x, y, z], "voxelDirt");
+	}*/
+	event.getHuman().setPosition(position);
+}
+
+function onBlockBreak(event){
+	console.log(event.getHuman().getName() + " 파괴" + "(" + event.getPosition().join(", ") + ")");
+	Socket.objectServer.emit('removeMesh', {
+		'id': "Practice_" + event.getPosition().join("_")
+	});
+}
+
+function onPlayerQuit(event){
+	console.log(event.getName() + "(" + event.getHuman().getTeamName() + ") 님이 나가셨습니다.");
+}
+function onPlayerHit(event){
+	console.log(event.getAttacker().getName() + " 님이 " + event.getVictim().getName() + " 님을 때렸습니다. (데미지 " + event.getDamage() + ")");
+}
+function onPlayerDeath(event){
+	console.log(event.getHuman().getName() + "님이 사망하셨습니다.");
+}

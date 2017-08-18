@@ -8,16 +8,16 @@ var World = {
 	},
 
 	requireSchemapack: null,
-	
+
 	objectPrevious: {},
 	objectWorld: {},
-	
+
 	intSpawnRed: [],
 	intSpawnBlue: [],
 	intFlagRed: [],
 	intFlagBlue: [],
 	intSeparator: [],
-	
+
 	init: function() {
 		{
 			World.requireSchemapack = require('schemapack').build([{
@@ -29,23 +29,23 @@ var World = {
 
 		{
 			World.objectPrevious = {};
-			
+
 			World.objectWorld = {};
 		}
-		
+
 		{
 			World.intSpawnRed = [];
-			
+
 			World.intSpawnBlue = [];
-			
+
 			World.intFlagRed = [];
-			
+
 			World.intFlagBlue = [];
-			
+
 			World.intSeparator = [];
 		}
 	},
-	
+
 	dispel: function() {
 		{
 			World.requireSchemapack = {};
@@ -53,23 +53,23 @@ var World = {
 
 		{
 			World.objectPrevious = {};
-			
+
 			World.objectWorld = {};
 		}
-		
+
 		{
 			World.intSpawnRed = [];
-			
+
 			World.intSpawnBlue = [];
-			
+
 			World.intFlagRed = [];
-			
+
 			World.intFlagBlue = [];
-			
+
 			World.intSeparator = [];
 		}
 	},
-	
+
 	saveBuffer: function(objectStorage) {
 		var objectBuffer = null;
 
@@ -105,7 +105,7 @@ var World = {
 
 		return objectBuffer;
 	},
-	
+
 	loadBuffer: function(objectStorage, objectBuffer) {
 		{
 			if (objectStorage === null) {
@@ -117,7 +117,7 @@ var World = {
 			if (objectStorage === World.objectWorld) {
 				{
 					World.objectPrevious = World.objectWorld;
-					
+
 					World.objectWorld = {};
 				}
 
@@ -140,41 +140,41 @@ var World = {
 				objectStorage[(objectWorld.intCoordinate[0] << 20) + (objectWorld.intCoordinate[1] << 10) + (objectWorld.intCoordinate[2] << 0)] = objectWorld;
 			}
 		}
-		
+
 		{
 			if (objectStorage === World.objectWorld) {
 				{
 					World.intSpawnRed = [];
-					
+
 					World.intSpawnBlue = [];
-					
+
 					World.intFlagRed = [];
-					
+
 					World.intFlagBlue = [];
-					
+
 					World.intSeparator = [];
 				}
 
 				{
 					for (var strCoordinate in World.objectWorld) {
 						var objectWorld = World.objectWorld[strCoordinate];
-						
+
 						{
 							if (objectWorld.strType === 'voxelSpawnRed') {
 								World.intSpawnRed.push(objectWorld.intCoordinate);
-								
+
 							} else if (objectWorld.strType === 'voxelSpawnBlue') {
 								World.intSpawnBlue.push(objectWorld.intCoordinate);
-								
+
 							} else if (objectWorld.strType === 'voxelFlagRed') {
 								World.intFlagRed.push(objectWorld.intCoordinate);
-								
+
 							} else if (objectWorld.strType === 'voxelFlagBlue') {
 								World.intFlagBlue.push(objectWorld.intCoordinate);
-								
+
 							} else if (objectWorld.strType === 'voxelSeparator') {
 								World.intSeparator.push(objectWorld.intCoordinate);
-								
+
 							}
 						}
 					}
@@ -182,7 +182,7 @@ var World = {
 			}
 		}
 	},
-	
+
 	update: function() {
 		{
 			World.updateLogic();
@@ -191,44 +191,44 @@ var World = {
 		if (Voxel === null) {
 			return;
 		}
-		
+
 		{
 			World.updateGraphics();
 		}
 	},
-		
+
 	updateLogic: function() {
-		
+
 	},
-	
+
 	updateGraphics: function() {
 		{
 			if (World.objectPrevious !== null) {
 				{
 					for (var strCoordinate in World.objectPrevious) {
 						var objectWorld = World.objectPrevious[strCoordinate];
-						
+
 						{
 							Voxel.requireVoxelengine.setBlock(objectWorld.intCoordinate, 0);
 						}
 					}
-					
+
 					for (var strCoordinate in World.objectWorld) {
 						var objectWorld = World.objectWorld[strCoordinate];
-						
+
 						{
 							Voxel.requireVoxelengine.setBlock(objectWorld.intCoordinate, Voxel.requireVoxelengine.materials.find(objectWorld.strType));
 						}
 					}
 				}
-				
+
 				{
 					World.objectPrevious = null;
 				}
 			}
 		}
 	},
-	
+
 	updateCreate: function(intCoordinate, strType, boolBlocked) {
 		{
 			World.objectWorld[(intCoordinate[0] << 20) + (intCoordinate[1] << 10) + (intCoordinate[2] << 0)] = {
@@ -241,12 +241,12 @@ var World = {
 		if (Voxel === null) {
 			return;
 		}
-		
+
 		{
 			Voxel.requireVoxelengine.setBlock(intCoordinate, Voxel.requireVoxelengine.materials.find(strType));
 		}
 	},
-	
+
 	updateDestroy: function(intCoordinate) {
 		{
 			delete World.objectWorld[(intCoordinate[0] << 20) + (intCoordinate[1] << 10) + (intCoordinate[2] << 0)];
@@ -255,12 +255,12 @@ var World = {
 		if (Voxel === null) {
 			return;
 		}
-		
+
 		{
 			Voxel.requireVoxelengine.setBlock(intCoordinate, 0);
 		}
 	},
-	
+
 	updateBlocked: function(intCoordinate) {
 		{
 			if (World.objectWorld[(intCoordinate[0] << 20) + (intCoordinate[1] << 10) + (intCoordinate[2] << 0)] !== undefined) {
@@ -278,7 +278,7 @@ var World = {
 							var intCoordinateX = World.intSpawnRed[intFor4][0] + intFor1;
 							var intCoordinateY = World.intSpawnRed[intFor4][1] + intFor2;
 							var intCoordinateZ = World.intSpawnRed[intFor4][2] + intFor3;
-		
+
 							if (intCoordinateX === intCoordinate[0]) {
 								if (intCoordinateY === intCoordinate[1]) {
 									if (intCoordinateZ === intCoordinate[2]) {
@@ -287,12 +287,12 @@ var World = {
 								}
 							}
 						}
-						
+
 						for (var intFor4 = 0; intFor4 < World.intSpawnBlue.length; intFor4 += 1) {
 							var intCoordinateX = World.intSpawnBlue[intFor4][0] + intFor1;
 							var intCoordinateY = World.intSpawnBlue[intFor4][1] + intFor2;
 							var intCoordinateZ = World.intSpawnBlue[intFor4][2] + intFor3;
-		
+
 							if (intCoordinateX === intCoordinate[0]) {
 								if (intCoordinateY === intCoordinate[1]) {
 									if (intCoordinateZ === intCoordinate[2]) {
@@ -312,7 +312,7 @@ var World = {
 							var intCoordinateX = World.intFlagRed[intFor4][0] + intFor1;
 							var intCoordinateY = World.intFlagRed[intFor4][1] + intFor2;
 							var intCoordinateZ = World.intFlagRed[intFor4][2] + intFor3;
-		
+
 							if (intCoordinateX === intCoordinate[0]) {
 								if (intCoordinateY === intCoordinate[1]) {
 									if (intCoordinateZ === intCoordinate[2]) {
@@ -321,12 +321,12 @@ var World = {
 								}
 							}
 						}
-						
+
 						for (var intFor4 = 0; intFor4 < World.intFlagBlue.length; intFor4 += 1) {
 							var intCoordinateX = World.intFlagBlue[intFor4][0] + intFor1;
 							var intCoordinateY = World.intFlagBlue[intFor4][1] + intFor2;
 							var intCoordinateZ = World.intFlagBlue[intFor4][2] + intFor3;
-		
+
 							if (intCoordinateX === intCoordinate[0]) {
 								if (intCoordinateY === intCoordinate[1]) {
 									if (intCoordinateZ === intCoordinate[2]) {
@@ -339,7 +339,7 @@ var World = {
 				}
 			}
 		}
-		
+
 		return false;
 	}
 };

@@ -8,14 +8,14 @@ var Item = {
 	},
 
 	requireSchemapack: null,
-	
+
 	objectItem: {},
 
 	objectRepository: {},
-	
+
 	functionFlagInit: null,
 	functionFlagPlayer: null,
-	
+
 	init: function() {
 		{
 			Item.requireSchemapack = require('schemapack').build([{
@@ -55,38 +55,38 @@ var Item = {
 				Item.objectRepository['entityArrow'].objectEntity.push(Voxel.entityCreate('entityArrow', Constants.dblGameScale));
 			}
 		}
-		
+
 		{
 			Item.functionFlagInit = function(objectItem) {
-				
+
 			};
-			
+
 			Item.functionFlagPlayer = function(objectItem) {
-				
+
 			};
 		}
 	},
-	
+
 	dispel: function() {
 		{
 			Item.requireSchemapack = {};
 		}
-		
+
 		{
 			Item.objectItem = {};
 		}
-		
+
 		{
 			Item.objectRepository = {};
 		}
-		
+
 		{
 			Item.functionFlagInit = null;
-			
+
 			Item.functionFlagPlayer = null;
 		}
 	},
-	
+
 	initFlag: function(objectItem) {
 		{
 			if (Item.objectItem['itemFlag - teamRed'] === undefined) {
@@ -98,7 +98,7 @@ var Item = {
 					'dblAcceleration': [ 0.0, 0.0, 0.0 ],
 					'dblRotation': [ 0.0, 0.0, 0.0 ]
 				};
-				
+
 				Item.functionFlagInit(Item.objectItem['itemFlag - teamRed']);
 			}
 
@@ -111,18 +111,18 @@ var Item = {
 					'dblAcceleration': [ 0.0, 0.0, 0.0 ],
 					'dblRotation': [ 0.0, 0.0, 0.0 ]
 				};
-				
+
 				Item.functionFlagInit(Item.objectItem['itemFlag - teamBlue']);
-			}	
+			}
 		}
-		
+
 		{
 			if (objectItem !== undefined) {
 				Item.functionFlagInit(objectItem);
 			}
 		}
 	},
-	
+
 	saveBuffer: function(objectStorage) {
 		var objectBuffer = null;
 
@@ -158,7 +158,7 @@ var Item = {
 
 		return objectBuffer;
 	},
-	
+
 	loadBuffer: function(objectStorage, objectBuffer) {
 		{
 			if (objectStorage === null) {
@@ -180,7 +180,7 @@ var Item = {
 			}
 		}
 	},
-	
+
 	update: function() {
 		{
 			Item.updateLogic();
@@ -189,17 +189,17 @@ var Item = {
 		if (Voxel === null) {
 			return;
 		}
-		
+
 		{
 			Item.updateGraphics();
 		}
 	},
-		
+
 	updateLogic: function() {
 		{
 			for (var strIdent in Item.objectItem) {
 				var objectItem = Item.objectItem[strIdent];
-				
+
 				{
 					if (objectItem.strIdent.indexOf('itemFlag') === 0) {
 						{
@@ -207,73 +207,73 @@ var Item = {
 							objectItem.dblGravity = Constants.dblFlagGravity;
 							objectItem.dblMaxvel = Constants.dblFlagMaxvel;
 							objectItem.dblFriction = Constants.dblFlagFriction;
-	
+
 							Physics.update(objectItem);
 							Physics.updateWorldcol(objectItem, false);
 						}
-						
+
 						{
 							objectItem.dblRotation[1] = (objectItem.dblRotation[1] + Constants.dblFlagRotate) % (2.0 * Math.PI);
 						}
-						
+
 						{
 							Item.functionFlagPlayer(objectItem);
 						}
-						
+
 					} else if (objectItem.strIdent.indexOf('itemArrow') === 0) {
 						{
 							objectItem.dblSize = Constants.dblArrowSize;
 							objectItem.dblGravity = Constants.dblArrowGravity;
 							objectItem.dblMaxvel = Constants.dblArrowMaxvel;
 							objectItem.dblFriction = Constants.dblArrowFriction;
-							
+
 							Physics.update(objectItem);
 							Physics.updateWorldcol(objectItem, false);
 						}
-						
+
 						{
 							var dblVelocityX = objectItem.dblPosition[0] - objectItem.dblVerlet[0];
 							var dblVelocityY = objectItem.dblPosition[1] - objectItem.dblVerlet[1];
 							var dblVelocityZ = objectItem.dblPosition[2] - objectItem.dblVerlet[2];
-	
+
 							objectItem.dblRotation[0] = 0.0;
 							objectItem.dblRotation[1] = Math.atan2(dblVelocityX, dblVelocityZ) + (1.0 * Math.PI);
 							objectItem.dblRotation[2] = Math.atan2(dblVelocityY, Math.sqrt((dblVelocityX * dblVelocityX) + (dblVelocityZ * dblVelocityZ)));
 						}
-						
+
 						{
 							if (objectItem.boolCollisionTop === true) {
 								delete Item.objectItem[objectItem.strIdent];
-								
+
 							} else if (objectItem.boolCollisionSide === true) {
 								delete Item.objectItem[objectItem.strIdent];
-								
+
 							} else if (objectItem.boolCollisionBottom === true) {
 								delete Item.objectItem[objectItem.strIdent];
-								
+
 							}
 						}
-						
+
 					}
 				}
 			}
-		}	
+		}
 	},
-	
+
 	updateGraphics: function() {
 		{
 			Item.objectRepository['entityFlag'].intLength = 2;
 
 			Item.objectRepository['entityArrow'].intLength = 0;
 		}
-		
+
 		{
 			for (var strIdent in Item.objectItem) {
 				var objectItem = Item.objectItem[strIdent];
-				
+
 				{
 					var objectEntity = null;
-					
+
 					{
 						if (objectItem.strIdent === 'itemFlag - teamRed') {
 							objectEntity = Item.objectRepository['entityFlag'].objectEntity[0];
@@ -286,13 +286,13 @@ var Item = {
 
 						}
 					}
-					
+
 					{
 						if (objectItem.strIdent.indexOf('itemFlag') === 0) {
 							objectEntity.position.x = objectItem.dblPosition[0];
 							objectEntity.position.y = objectItem.dblPosition[1];
 							objectEntity.position.z = objectItem.dblPosition[2];
-							
+
 							objectEntity.rotation.x = objectItem.dblRotation[0];
 							objectEntity.rotation.y = objectItem.dblRotation[1];
 							objectEntity.rotation.z = objectItem.dblRotation[2];
@@ -301,17 +301,17 @@ var Item = {
 							objectEntity.position.x = objectItem.dblPosition[0];
 							objectEntity.position.y = objectItem.dblPosition[1];
 							objectEntity.position.z = objectItem.dblPosition[2];
-							
+
 							objectEntity.rotation.x = objectItem.dblRotation[0];
 							objectEntity.rotation.y = objectItem.dblRotation[1] + (0.5 * Math.PI);
 							objectEntity.rotation.z = objectItem.dblRotation[2] + (1.25 * Math.PI);
-							
+
 						}
 					}
 				}
 			}
 		}
-		
+
 		{
 			for (var strEntity in Item.objectRepository) {
 				for (var intFor1 = 0; intFor1 < Item.objectRepository[strEntity].intLength; intFor1 += 1) {
@@ -319,7 +319,7 @@ var Item = {
 						Voxel.requireVoxelengine.scene.add(Item.objectRepository[strEntity].objectEntity[intFor1]);
 					}
 				}
-				
+
 				for (var intFor1 = Item.objectRepository[strEntity].intLength; intFor1 < Item.objectRepository[strEntity].objectEntity.length; intFor1 += 1) {
 					if (Item.objectRepository[strEntity].objectEntity[intFor1].parent !== undefined) {
 						Voxel.requireVoxelengine.scene.remove(Item.objectRepository[strEntity].objectEntity[intFor1]);

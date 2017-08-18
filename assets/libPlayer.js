@@ -1,5 +1,4 @@
 'use strict';
-
 var Player = {
 	browserify: function(objectBrowserify) {
 		for (var strKey in objectBrowserify) {
@@ -8,11 +7,11 @@ var Player = {
 	},
 
 	requireSchemapack: null,
-	
+
 	objectPlayer: {},
-	
+
 	objectRepository: {},
-	
+
 	init: function() {
 		{
 			Player.requireSchemapack = require('schemapack').build([{
@@ -26,11 +25,13 @@ var Player = {
 				'intHealth': 'varint',
 				'dblPosition': [ 'float32' ],
 				'dblVerlet': [ 'float32' ],
+				'dblGravity': [ 'float32' ],
 				'dblAcceleration': [ 'float32' ],
 				'dblRotation': [ 'float32' ],
 				'intJumpcount': 'varint',
 				'intWalk': 'varint',
-				'intWeapon': 'varint'
+				'intWeapon': 'varint',
+				'boolFly': 'bool'
 			}]);
 		}
 
@@ -66,21 +67,21 @@ var Player = {
 			}
 		}
 	},
-	
+
 	dispel: function() {
 		{
 			Player.requireSchemapack = {};
 		}
-		
+
 		{
 			Player.objectPlayer = {};
 		}
-		
+
 		{
 			Player.objectRepository = {};
 		}
 	},
-	
+
 	initController: function() {
 		{
 			Player.objectPlayer['1'] = {
@@ -98,7 +99,8 @@ var Player = {
 				'dblRotation': [ 0.0, 0.0, 0.0 ],
 				'intJumpcount': 0,
 				'intWalk': 0,
-				'intWeapon': 0
+				'intWeapon': 0,
+				'boolFly': false
 			};
 		}
 
@@ -120,7 +122,7 @@ var Player = {
 			Voxel.requireVoxelengine.control(objectController);
 		}
 	},
-	
+
 	saveBuffer: function(objectStorage) {
 		var objectBuffer = null;
 
@@ -180,7 +182,6 @@ var Player = {
 
 					objectPlayer[strAttribute] = voidAttribute;
 				}
-
 				objectSchemapack.push(objectPlayer);
 			}
 
@@ -189,7 +190,7 @@ var Player = {
 
 		return objectBuffer;
 	},
-	
+
 	loadBuffer: function(objectStorage, objectBuffer) {
 		{
 			if (objectStorage === null) {
@@ -219,7 +220,7 @@ var Player = {
 							voidAttribute = 'teamBlue';
 
 						}
-						
+
 					} else if (strAttribute === 'intEntity') {
 						strAttribute = 'strEntity';
 
@@ -236,17 +237,16 @@ var Player = {
 							voidAttribute = 'entityBow';
 
 						}
-						
+
 					}
 
 					objectPlayer[strAttribute] = voidAttribute;
 				}
-
 				objectStorage[objectPlayer.strIdent] = objectPlayer;
 			}
 		}
 	},
-	
+
 	update: function() {
 		{
 			Player.updateLogic();
@@ -255,12 +255,12 @@ var Player = {
 		if (Voxel === null) {
 			return;
 		}
-		
+
 		{
 			Player.updateGraphics();
 		}
 	},
-		
+
 	updateLogic: function() {
 		{
 			if (Player.objectPlayer['1'] !== undefined) {
@@ -269,7 +269,7 @@ var Player = {
 				Player.objectPlayer['1'].dblRotation[2] = Player.objectRepository['characterController'].objectCharacter[0].mesh.head.rotation.x;
 			}
 		}
-		
+
 		{
 			for (var strIdent in Player.objectPlayer) {
 				var objectPlayer = Player.objectPlayer[strIdent];
@@ -277,17 +277,18 @@ var Player = {
 				if (objectPlayer.strTeam === '') {
 					continue;
 				}
-				
+
 				{
 					objectPlayer.dblSize = Constants.dblPlayerSize;
+					if (objectPlayer.dblGravity === null || objectPlayer.dblGravity === undefined)
 					objectPlayer.dblGravity = Constants.dblPlayerGravity;
 					objectPlayer.dblMaxvel = Constants.dblPlayerMaxvel;
 					objectPlayer.dblFriction = Constants.dblPlayerFriction;
-					
+
 					Physics.update(objectPlayer);
 					Physics.updateWorldcol(objectPlayer, false);
 				}
-				
+
 				{
 					if (objectPlayer.boolCollisionBottom === true) {
 						if (Math.abs(objectPlayer.dblPosition[1] - objectPlayer.dblVerlet[1]) < 0.0001) {
@@ -295,7 +296,7 @@ var Player = {
 						}
 					}
 				}
-				
+
 				{
 					var dblVelocityX = objectPlayer.dblPosition[0] - objectPlayer.dblVerlet[0];
 					var dblVelocityY = objectPlayer.dblPosition[1] - objectPlayer.dblVerlet[1];
@@ -303,27 +304,27 @@ var Player = {
 
 					if (Math.abs(dblVelocityX) > 0.01) {
 						objectPlayer.intWalk += 1
-						
+
 					} else if (Math.abs(dblVelocityZ) > 0.01) {
 						objectPlayer.intWalk += 1;
-						
+
 					}
-					
+
 					if (Math.abs(dblVelocityX) < 0.01) {
 						if (Math.abs(dblVelocityZ) < 0.01) {
 							objectPlayer.intWalk = 0;
 						}
 					}
-					
+
 					if (objectPlayer.intWeapon > 0) {
 						objectPlayer.intWeapon -= 1;
 					}
 				}
 			}
 		}
-		
+
 	},
-	
+
 	updateGraphics: function() {
 		{
 			Player.objectRepository['characterController'].intLength = 1;
@@ -332,7 +333,7 @@ var Player = {
 
 			Player.objectRepository['characterBlue'].intLength = 0;
 		}
-		
+
 		{
 			for (var strIdent in Player.objectPlayer) {
 				var objectPlayer = Player.objectPlayer[strIdent];
@@ -340,10 +341,10 @@ var Player = {
 				if (objectPlayer.strTeam === '') {
 					continue;
 				}
-				
+
 				{
 					var objectCharacter = null;
-					
+
 					{
 						if (objectPlayer.strIdent === '1') {
 							objectCharacter = Player.objectRepository['characterController'].objectCharacter[0];
@@ -365,26 +366,26 @@ var Player = {
 							objectCharacter.mesh.position.x = objectPlayer.dblPosition[0];
 							objectCharacter.mesh.position.y = objectPlayer.dblPosition[1] - (0.5 * Constants.dblPlayerSize[1]);
 							objectCharacter.mesh.position.z = objectPlayer.dblPosition[2];
-							
+
 						} else if (objectPlayer.strIdent !== '1') {
 							objectCharacter.mesh.position.x = objectPlayer.dblPosition[0];
 							objectCharacter.mesh.position.y = objectPlayer.dblPosition[1] - (0.5 * Constants.dblPlayerSize[1]);
 							objectCharacter.mesh.position.z = objectPlayer.dblPosition[2];
-							
+
 							objectCharacter.mesh.rotation.y = objectPlayer.dblRotation[1];
-	
+
 							objectCharacter.mesh.head.rotation.x = objectPlayer.dblRotation[2];
-							
+
 						}
 					}
-					
+
 					{
 						Voxel.characterUpdate(objectCharacter, objectPlayer);
 					}
 				}
 			}
 		}
-		
+
 		{
 			for (var strCharacter in Player.objectRepository) {
 				for (var intFor1 = 0; intFor1 < Player.objectRepository[strCharacter].intLength; intFor1 += 1) {
@@ -392,7 +393,7 @@ var Player = {
 						Voxel.requireVoxelengine.scene.add(Player.objectRepository[strCharacter].objectCharacter[intFor1].mesh);
 					}
 				}
-				
+
 				for (var intFor1 = Player.objectRepository[strCharacter].intLength; intFor1 < Player.objectRepository[strCharacter].objectCharacter.length; intFor1 += 1) {
 					if (Player.objectRepository[strCharacter].objectCharacter[intFor1].mesh.parent !== undefined) {
 						Voxel.requireVoxelengine.scene.remove(Player.objectRepository[strCharacter].objectCharacter[intFor1].mesh);
@@ -402,5 +403,4 @@ var Player = {
 		}
 	}
 };
-
 module.exports = Player;

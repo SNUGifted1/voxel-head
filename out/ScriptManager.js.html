@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ScriptManager.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ScriptManager.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/** @fileoverview Script를 불러오고 관리합니다.
+ * @author Scripter36(1350adwx)
+ */
+
+/** 문자열으로부터 모듈을 불러옵니다.
+ * @author Scripter36(1350adwx)
+ * @param {String} src 불러올 문자열
+ * @param {String} filename 파일 이름 (그냥 "" 로 비워두어도 됨)
+ * @return {Object} 불러와진 모둘
+ */
+function requireFromString(src, filename) {
+    var Module = module.constructor;
+    var m = new Module();
+    m._compile(src, filename);
+    return m.exports;
+}
+
+var THREE = require("three");
+
+/**
+ * 서버 관련 함수들입니다.
+ * @author Scripter36(1350adwx)
+ * @type {Object}
+ */
+var Server = {};
+/**
+ * Human을 정확한 이름으로 가져옵니다.
+ * @author Scripter36(1350adwx)
+ * @param  {String} name 정확한 이름
+ * @return {Human}      Human
+ */
+Server.getExactPlayer = function(name) {
+        for (var i in Player.objectPlayer) {
+            if (Player.objectPlayer[i].strName === name) {
+                return new Human().setHumanIdent(i);
+            }
+        }
+        console.log("Cannot Find Player " + name + ".");
+        return;
+    }
+    /**
+     * Human을 단편적인 이름으로 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @param  {String} name 단편적인 이름
+     * @return {Human}      Human
+     */
+Server.getPlayer = function(name) {
+        for (var i in Player.objectPlayer) {
+            if (Player.objectPlayer[i].strName.indexOf(name) != -1) {
+                return new Human().setHumanIdent(i);
+            }
+        }
+        console.log("Cannot Find Player " + name + ".");
+        return;
+    }
+    /**
+     * 메시지를 전송합니다.
+     * @author Scripter36(1350adwx)
+     * @param  {String} sender   보내는 사람 이름
+     * @param  {String} message  보낼 내용
+     * @param  {Human} receiver 받는 Human
+     */
+Server.sendMessage = function(sender, message, receiver) {
+    if (typeof Human === undefined || receiver instanceof Human === false) {
+        Socket.objectServer.emit('eventChat', {
+            'strName': sender.toString(),
+            'strMessage': message.toString()
+        });
+    } else {
+        Socket.objectServer.emit('eventChat', {
+            'strName': sender.toString(),
+            'strMessage': message.toString(),
+            'strReceiver': receiver.getName()
+        });
+    }
+}
+
+/**
+ * 사람 관련 객체입니다
+ * @author Scripter36(1350adwx)
+ * @class
+ */
+function Human() {
+    /** @type {String} 사람 Ident */
+    this.HumanIdent = undefined;
+    /**
+     * Human이 가리키는 사람 Ident를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} ident 가리킬 사람 Ident
+     */
+    this.setHumanIdent = function(ident) {
+            this.HumanIdent = ident;
+            return this;
+        }
+        /**
+         * Human이 가리키는 사람 ident를 반환합니다.
+         * @author Scripter36(1350adwx)
+         * @return {String} ident
+         */
+    this.getHumanIdent = function() {
+            return this.HumanIdent;
+        }
+        /**
+         * Human의 체력을 반환합니다.
+         * @author Scripter36(1350adwx)
+         * @return {Number} 체력
+         */
+    this.getHealth = function() {
+            if (this.HumanIdent === undefined) return;
+            if (Player.objectPlayer[this.HumanIdent] === undefined) return;
+            return Player.objectPlayer[this.HumanIdent].intHealth;
+        }
+        /**
+         * Human의 체력을 설정합니다.
+         * @author Scripter36(1350adwx)
+         * @param {Number} health 체력
+         */
+    this.setHealth = function(health) {
+            if (this.HumanIdent === undefined) return this;
+            if (Player.objectPlayer[this.HumanIdent] === undefined) return this;
+            if (isNaN(health)) return this;
+            Player.objectPlayer[this.HumanIdent].intHealth = health;
+            Socket.objectServer.emit('eventPlayer', {
+                'strBuffer': Player.saveBuffer(null)
+            });
+            return this;
+        }
+        /**
+         * Human의 팀명을 가져옵니다.
+         * @author Scripter36(1350adwx)
+         * @return {String} 팀명
+         */
+    this.getTeamName = function() {
+            if (this.HumanIdent === undefined) return;
+            if (Player.objectPlayer[this.HumanIdent] === undefined) return;
+            return Player.objectPlayer[this.HumanIdent].strTeam;
+        }
+        /*this.setTeam = function(team){
+        	if (this.HumanIdent === undefined) return;
+        	if (Player.objectPlayer[this.HumanIdent] === undefined) return;
+        	Player.objectPlayer[this.HumanIdent].intHealth = health;
+        	Socket.objectServer.emit('eventPlayer', {
+        		'strBuffer': Player.saveBuffer(null)
+        	});
+        }*/
+        /**
+         * Human의 이름을 가져옵니다.
+         * @author Scripter36(1350adwx)
+         * @return {String} 이름
+         */
+    this.getName = function() {
+            if (this.HumanIdent === undefined) return;
+            if (Player.objectPlayer[this.HumanIdent] === undefined) return;
+            return Player.objectPlayer[this.HumanIdent].strName;
+        }
+        /**
+         * Human의 이름을 설정합니다.
+         * @author Scripter36(1350adwx)
+         * @param {String} name 이름
+         */
+    this.setName = function(name) {
+        if (this.HumanIdent === undefined) return this;
+        if (Player.objectPlayer[this.HumanIdent] === undefined) return this;
+        Player.objectPlayer[this.HumanIdent].strName = name;
+        return this;
+    }
+}
+
+var NodeRect;
+var Node;
+var Aws;
+var Express;
+var Geoip;
+var Hypertextmin;
+var Mime;
+var Multer;
+var Mustache;
+var Phantom;
+var Postgres;
+var Recaptcha;
+var Socket;
+var Xml;
+var Server;
+var Human;
+
+
+/** @description 내부 함수들을 정리하고 NodeRect 모듈을 가져오고 스크립트를 불러옵니다.
+ * @author Scripter36(1350adwx)
+ * @param {Object} nodeRect NodeRect 모듈
+ */
+exports.init = function(nodeRect) {
+    /** @type {NodeRect} 각종 기능을 위해 가져옵니다. */
+    NodeRect = nodeRect;
+    Node = NodeRect.Node;
+    Aws = NodeRect.Aws;
+    Express = NodeRect.Express;
+    Geoip = NodeRect.Geoip;
+    Hypertextmin = NodeRect.Hypertextmin;
+    Mime = NodeRect.Mime;
+    Multer = NodeRect.Multer;
+    Mustache = NodeRect.Mustache;
+    Phantom = NodeRect.Phantom;
+    Postgres = NodeRect.Postgres;
+    Recaptcha = NodeRect.Recaptcha;
+    Socket = NodeRect.Socket;
+    Xml = NodeRect.Xml;
+    /** @type {Module} 파일 입출력 모듈입니다. */
+    var fs = require('fs');
+    /** @type {Array} 스크립트 모듈들 모음입니다. */
+    exports.scripts = [];
+    /** @type {Boolean} 스크립트 로딩 완료 여부입니다. */
+    exports.loaded = false;
+    /** @type {String} 스크립트 불러올 경로입니다. */
+    var path = "./scripts";
+    fs.readdir(path, function(error, files) {
+        if (error) {
+            throw error;
+        }
+        /** @type {Number} count 스크립트 로딩한 숫자 */
+        var count = 0;
+        var Add = fs.readFileSync("./add.js").toString().split("/*SPLIT*/");
+        files.forEach(function(file) {
+            //확장자가 js 일 시
+            if (file.endsWith(".js")) {
+                //카운트 올리고
+                count++;
+                //require 한 뒤
+                var i = requireFromString(Add[0] + fs.readFileSync(path + "/" + file).toString() + Add[1], "");
+                //스크립트 배열에 넣고
+                module.exports.scripts.push(i);
+                //처음 불러오는 함수 실행
+                i.onLoad(NodeRect, Server, Human, THREE);
+            }
+        });
+        //로딩 여부 true
+        exports.loaded = true;
+        //로그 띄웁니다.
+        console.log("[ScriptManager] " + count + " 개의 스크립트를 로딩했습니다.");
+    });
+}
+
+/** @description 플레이어가 로그인할 시 onPlayerLogin 함수에 전달 될 이벤트입니다.
+ * @author Scripter36(1350adwx)
+ * @param {Object} objectData 로그인 관련 데이터
+ * @param {Object} resultData 로그인 처리 결과 데이터
+ * @class
+ */
+exports.PlayerLoginEvent = function(objectData, resultData) {
+    /** @type {Boolean} PlayerLoginEvent의 취소 여부입니다. */
+    var canceled = false;
+    /** @type {String} PlayerLoginEvent를 취소당한 플레이어가 받을 메시지입니다. */
+    var canceledMessage = "Login Canceled by Script.";
+
+
+    /** @description PlayerLoginEvent의 취소 여부를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {boolean} cancel 취소 여부. undefined 일 시(즉 쓰지 않을 시) true
+     * @return {PlayerLoginEvent} 메소드 체이닝을 위하여 자기 자신을 반환합니다.
+     */
+    this.setCanceled = function(cancel) {
+        //undefined 일 시에만 true로 변경
+        if (cancel === undefined) cancel = true;
+        //Boolean 타입으로 변환
+        canceled = cancel == true;
+        //메소드 체이닝.
+        return this;
+    }
+
+    /** @description PlayerLoginEvent의 취소 여부를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {boolean} 취소 여부
+     */
+    this.isCanceled = function() {
+        return canceled;
+    }
+
+    /** @description PlayerLoginEvent를 발동시킨 플레이어의 이름을 변경합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} name 설정할 이름
+     * @return {PlayerLoginEvent} 메소드 체이닝
+     */
+    this.setName = function(name) {
+        objectData.strName = name.toString();
+        return this;
+    }
+
+    /** @description PlayerLoginEvent를 발동시킨 플레이어의 이름을 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 플레이어의 이름
+     */
+    this.getName = function() {
+        return objectData.strName;
+    }
+
+    /** @description PlayerLoginEvent를 발동시킨 플레이어의 팀 이름을 변경합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} team 바뀔 팀의 이름
+     * @return {PlayerLoginEvent} 메소드 체이닝
+     */
+    this.setTeamName = function(team) {
+        objectData.strTeam = team.toString();
+        return this;
+    }
+
+    /** @description PlayerLoginEvent를 발동시킨 플레이어의 팀 이름을 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 팀 이름
+     */
+    this.getTeamName = function() {
+        return objectData.strTeam;
+    }
+
+    /** @description PlayerLoginEvent가 성공하였는지를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {Boolean} 성공 여부
+     */
+    this.isSuccessed = function() {
+        return resultData.strType !== "typeReject";
+    }
+
+    /** @description PlayerLoginEvent 실패 이유를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} reason 설정할 실패 이유
+     * @return {PlayerLoginEvent} 메소드 체이닝
+     */
+    this.setRejectReason = function(reason) {
+        resultData.strMessage = reason.toString();
+        return this;
+    }
+
+    /** @description PlayerLoginEvent 실패 이유를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 실패 이유
+     */
+    this.getRejectReason = function() {
+        return resultData.strMessage;
+    }
+
+    /** @description PlayerLoginEvent 취소 이유를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 이유
+     */
+    this.getCanceledMessage = function() {
+        return canceledMessage;
+    }
+
+    /** @description PlayerLoginEvent 취소 이유를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} message 이유
+     * @return {PlayerLoginEvent} 메소드 체이닝
+     */
+    this.setCanceledMessage = function(message) {
+        canceledMessage = message.toString();
+        return this;
+    }
+}
+
+/**
+ * PlayerLoginEvent를 모든 스크립트에게 전송합니다.
+ * @author Scripter36(1350adwx)
+ * @param  {Object} objectData
+ * @param  {Object} objectSocket
+ * @return {PlayerLoginEvent} PlayerLoginEvent
+ */
+exports.callPlayerLoginEvent = function(objectData, objectSocket) {
+    let event = new exports.PlayerLoginEvent(objectData, objectSocket);
+    for (let i of exports.scripts) {
+        if (typeof i.onPlayerLogin != "undefined") {
+            i.onPlayerLogin(event);
+        }
+    }
+    return event;
+}
+
+/**
+ * 플레이어가 채팅을 할 시 발동됩니다.
+ * @author Scripter36(1350adwx)
+ * @param {Object} objectData 각종 정보
+ * @param {Object} objectSocket 플레이어 불러오기 등등을 위함
+ * @class
+ */
+exports.PlayerChatEvent = function(objectData, objectSocket) {
+
+    /** @type {Boolean} PlayerChatEvent의 취소 여부입니다. */
+    var canceled = false;
+
+
+    /** @type {String} PlayerChatEvent를 발동시킨 사람 이름입니다. */
+    var name = Player.objectPlayer[objectSocket.strIdent].strName;
+
+    /** @type {Number} PlayerChatEvent에서 허용되는 최대 채팅 길이입니다. 이것 이후로는 잘립니다. */
+    var maxLeng = 140;
+
+    /** @type {String} 취소당한 플레이어에게 보낼 메시지 */
+    var canceledMessage = null;
+
+    /**
+     * 취소당한 플레이어에게 보여질 보낸 사람 이름입니다. 공백이면 안 보입니다.
+     * @author Scripter36(1350adwx)
+     * @type {String}
+     */
+    var canceledSender = "";
+
+    /**
+     * PlayerChatEvent 취소 여부를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {Boolean} cancel 취소 여부. undefined 일 시 true입니다.
+     */
+    this.setCanceled = function(cancel) {
+        if (cancel === undefined) cancel = true;
+        canceled = cancel == true;
+        return this;
+    }
+
+    /**
+     * PlayerChatEvent 취소 여부를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {Boolean} 취소 여부
+     */
+    this.isCanceled = function() {
+        return canceled;
+    }
+
+    /**
+     * PlayerChatEvent를 발생시킨 플레이어의 Ident를 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 플레이어 Ident
+     * @deprecated getHuman을 사용하여 주세요.
+     */
+    this.getPlayerIdent = function() {
+        return objectSocket.strIdent;
+    }
+
+    /**
+     * PlayerChatEvent를 발생시킨 Human을 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {Human} Human
+     */
+    this.getHuman = function() {
+        return new Human().setHumanIdent(objectSocket.strIdent);
+    }
+
+    /**
+     * PlayerChatEvent에서 채팅 메시지를 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 채팅 메시지
+     */
+    this.getMessage = function() {
+        return objectData.strMessage;
+    }
+
+    /**
+     * PlayerChatEvent에서 채팅 메시지를 변경합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} message 변경할 메시지
+     */
+    this.setMessage = function(message) {
+        objectData.strMessage = message.toString();
+        return this;
+    }
+
+    /**
+     * PlayerChatEvent를 발생시킨 사람 이름을 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 이름
+     */
+    this.getName = function() {
+        return name;
+    }
+
+    /**
+     * PlayerChatEvent를 발생시킨 사람 이름을 수정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} name 변경될 이름
+     */
+    this.setName = function(name) {
+        name = name.toString();
+        return this;
+    }
+
+    /**
+     * PlayerChatEvent를 발생시킨 플레이어의 Ident를 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 플레이어 Ident
+     * @deprecated getHuman을 사용하여 주세요.
+     */
+    this.getPlayerIdent = function() {
+        return objectSocket.strIdent;
+    }
+
+    /**
+     * PlayerChatEvent를 발생시킨 Human을 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {Human} Human
+     */
+    this.getHuman = function() {
+        return new Human().setHumanIdent(objectSocket.strIdent);
+    }
+
+    /**
+     * PlayerChatEvent에서의 채팅 최대 길이를 불러옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {Number} 최대 길이
+     */
+    this.getMaxLength = function() {
+        return maxLeng;
+    }
+
+    /**
+     * PlayerChatEvent에서의 채팅 최대 길이를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {Number} leng 채팅 최대 길이
+     */
+    this.setMaxLength = function(leng) {
+        if (isNaN(leng)) return this;
+        leng = parseInt(leng);
+        if (leng &lt; 0) return this;
+        maxLeng = leng;
+        return this;
+    }
+
+    /**
+     * PlayerChatEvent 취소시 나올 메시지를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} message 메시지
+     */
+    this.setCanceledMessage = function(message) {
+        if (message == undefined || message === null) {
+            message = null;
+        } else message = message.toString();
+        canceledMessage = message;
+        return this;
+    }
+
+    /**
+     * PlayerChatEvent 취소시 나올 메시지를 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 메시지
+     */
+    this.getCanceledMessage = function() {
+        return canceledMessage;
+    }
+
+    /**
+     * PlayerChatEvent 취소시 나올 사람 이름을 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} sender 이름
+     */
+    this.setCanceledSender = function(sender) {
+        if (sender == undefined || sender === null) {
+            sender = "";
+        } else sender = sender.toString();
+        canceledSender = sender;
+        return this;
+    }
+
+    /**
+     * PlayerChatEvent 취소시 나올 사람 이름을 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 이름
+     */
+    this.getCanceledSender = function() {
+        return canceledSender;
+    }
+}
+
+/**
+ * PlayerChatEvent를 모든 스크립트에게 전송합니다.
+ * @author Scripter36(1350adwx)
+ * @param  {Object} objectData
+ * @param  {Object} objectSocket
+ * @return {PlayerChatEvent} PlayerChatEvent
+ */
+exports.callPlayerChatEvent = function(objectData, objectSocket) {
+    let event = new exports.PlayerChatEvent(objectData, objectSocket);
+    for (let i of exports.scripts) {
+        if (typeof i.onPlayerChat != "undefined") {
+            i.onPlayerChat(event);
+        }
+    }
+    return event;
+}
+
+/**
+ * 플레이어가 블럭을 설치했을 때 발동됩니다.
+ * @author Scripter36(1350adwx)
+ * @param {Object} objectData   [description]
+ * @param {Object} objectSocket [description]
+ * @class
+ */
+exports.BlockPlaceEvent = function(objectData, objectSocket) {
+
+    /** @type {Boolean} BlockPlaceEvent의 취소 여부입니다 */
+    var canceled = false;
+
+    /**
+     * BlockPlaceEvent의 취소 여부를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {Boolean} cancel 취소 여부
+     */
+    this.setCanceled = function(cancel) {
+        if (cancel === undefined) cancel = true;
+        canceled = cancel == true;
+        return this;
+    }
+
+    /**
+     * BlockPlaceEvent의 취소 여부를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {Boolean} 블럭 설치 취소 여부
+     */
+    this.isCanceled = function() {
+        return canceled;
+    }
+
+    /**
+     * BlockPlaceEvent에서 설치될 블럭의 타입을 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {String} type 블럭 타입
+     */
+    this.setBlockType = function(type) {
+        if (type === undefined) return this;
+        objectData.strType = type.toString();
+        return this;
+    }
+
+    /**
+     * BlockPlaceEvent에서 설치될 블럭의 타입을 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 블럭 타입
+     */
+    this.getBlockType = function() {
+        return objectData.strType;
+    }
+
+    /**
+     * BlockPlaceEvent를 발생시킨 Human을 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {Human} Human
+     */
+    this.getHuman = function() {
+        return new Human().setHumanIdent(objectSocket.strIdent);
+    }
+
+    /**
+     * BlockPlaceEvent가 일어난 위치를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {Array} 위치([x, y, z])
+     */
+    this.getPosition = function() {
+        return objectData.intCoordinate;
+    }
+
+    /**
+     * BlockPlaceEvent가 일어날 위치를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {position} position 위치
+     */
+    this.setPosition = function(position) {
+        if (typeof position === 'array' &amp;&amp; position.length === 3) {
+            objectData.intCoordinate = position;
+            return this;
+        }
+        return this;
+    }
+
+}
+
+
+/**
+ * 플레이어가 블럭을 파괴했을 때 발동됩니다.
+ * @author Scripter36(1350adwx)
+ * @param {Object} objectData   [description]
+ * @param {Object} objectSocket [description]
+ * @class
+ */
+exports.BlockBreakEvent = function(objectData, objectSocket) {
+
+    /** @type {Boolean} BlockBreakEvent 취소 여부입니다 */
+    var canceled = false;
+
+    /**
+     * BlockBreakEvent의 취소 여부를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {Boolean} cancel 취소 여부
+     */
+    this.setCanceled = function(cancel) {
+        if (cancel === undefined) cancel = true;
+        canceled = cancel == true;
+        return this;
+    }
+
+    /**
+     * BlockBreakEvent의 취소 여부를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {Boolean} 블럭 설치 취소 여부
+     */
+    this.isCanceled = function() {
+        return canceled;
+    }
+
+    /**
+     * BlockBreakEvent를 발생시킨 플레이어의 Ident를 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 플레이어 Ident
+     * @deprecated getHuman을 사용하여 주세요.
+     */
+    this.getPlayerIdent = function() {
+        return objectSocket.strIdent;
+    }
+
+    /**
+     * BlockBreakEvent를 발생시킨 Human을 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {Human} Human
+     */
+    this.getHuman = function() {
+        return new Human().setHumanIdent(objectSocket.strIdent);
+    }
+
+    /**
+     * BlockBreakEvent가 일어난 위치를 반환합니다.
+     * @author Scripter36(1350adwx)
+     * @return {Array} 위치([x, y, z])
+     */
+    this.getPosition = function() {
+        return objectData.intCoordinate;
+    }
+
+    /**
+     * BlockBreakEvent가 일어날 위치를 설정합니다.
+     * @author Scripter36(1350adwx)
+     * @param {position} position 위치
+     */
+    this.setPosition = function(position) {
+        if (typeof position === 'array' &amp;&amp; position.length === 3) {
+            objectData.intCoordinate = position;
+            return this;
+        }
+        return this;
+    }
+
+}
+
+/**
+ * BlockPlaceEvent를 모든 스크립트에게 전송합니다.
+ * @author Scripter36(1350adwx)
+ * @param  {Object} objectData
+ * @param  {Object} objectSocket
+ * @return {BlockPlaceEvent} BlockPlaceEvent
+ */
+exports.callBlockPlaceEvent = function(objectData, objectSocket) {
+    let event = new exports.BlockPlaceEvent(objectData, objectSocket);
+    for (let i of exports.scripts) {
+        if (typeof i.onBlockPlace != "undefined") {
+            i.onBlockPlace(event);
+        }
+    }
+    return event;
+}
+
+/**
+ * BlockBreakEvent를 모든 스크립트에게 전송합니다.
+ * @author Scripter36(1350adwx)
+ * @param  {Object} objectData
+ * @param  {Object} objectSocket
+ * @return {BlockBreakEvent} BlockBreakEvent
+ */
+exports.callBlockBreakEvent = function(objectData, objectSocket) {
+    let event = new exports.BlockBreakEvent(objectData, objectSocket);
+    for (let i of exports.scripts) {
+        if (typeof i.onBlockBreak != "undefined") {
+            i.onBlockBreak(event);
+        }
+    }
+    return event;
+}
+
+/**
+ * 플레이어가 연결을 종료할 때 발동됩니다.
+ * @param {Object} objectSocket
+ * @class
+ */
+exports.PlayerQuitEvent = function(objectSocket) {
+    /**
+     * PlayerQuitEvent를 발생시킨 플레이어의 Ident를 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {String} 플레이어 Ident
+     * @deprecated getHuman을 사용하여 주세요.
+     */
+    this.getPlayerIdent = function() {
+        return objectSocket.strIdent;
+    }
+
+    /**
+     * PlayerQuitEvent를 발생시킨 Human을 가져옵니다.
+     * @author Scripter36(1350adwx)
+     * @return {Human} Human
+     */
+    this.getHuman = function() {
+        return new Human().setHumanIdent(objectSocket.strIdent);
+    }
+
+    /**
+     * PlayerQuitEvent를 발동시킨 사람 이름을 반환합니다.
+     * @return {String} 이름
+     */
+    this.getName = function() {
+        return this.getHuman().getName();
+    }
+}
+
+/**
+ * PlayerQuitEvent를 모든 스크립트에게 전송합니다.
+ * @author Scripter36(1350adwx)
+ * @param  {Object} objectSocket
+ * @return {BlockBreakEvent} PlayerQuitEvent
+ */
+exports.callPlayerQuitEvent = function(objectSocket) {
+    if (new Human().setHumanIdent(objectSocket.strIdent).getName() == "") return;
+    let event = new exports.PlayerQuitEvent(objectSocket);
+    for (let i of exports.scripts) {
+        if (typeof i.onPlayerQuit != "undefined") {
+            i.onPlayerQuit(event);
+        }
+    }
+    return event;
+}
+
+/**
+ * 플레이어가 플레이어를 공격할 때 발동됩니다.
+ * @param {Object} objectPlayer 맞은 사람
+ * @param {Object} objectItem   맞힌 아이템
+ * @class
+ */
+exports.PlayerHitEvent = function(objectPlayer, objectItem, damage) {
+    /** @type {Boolean} */
+    var canceled = false;
+    /** @type {Number} */
+    var damage = damage;
+    /**
+     * PlayerHitEvent를 취소합니다.
+     * @param {Boolean} cancel 취소 여부
+     */
+    this.setCanceled = function(cancel) {
+            if (cancel == undefined) cancel = true;
+            canceled = cancel == true;
+            return this;
+        }
+        /**
+         * PlayerHitEvent 취소 여부를 반환합니다.
+         * @return {Boolean} 취소 여부
+         */
+    this.isCanceled = function() {
+            return canceled;
+        }
+        /**
+         * 공격한 사람을 반환합니다.
+         * @return {Human} 가해자
+         */
+    this.getAttacker = function() {
+            return new Human().setHumanIdent(objectItem.strPlayer);
+        }
+        /**
+         * 공격한 사람을 설정합니다.
+         * @param {Human} human 가해자
+         */
+    this.setAttacker = function(human) {
+            if (human instanceof Human) objectItem.strPlayer = human.getHumanIdent();
+            return this;
+        }
+        /**
+         * 공격받은 사람을 반환합니다.
+         * @return {Human} 피해자
+         */
+    this.getVictim = function() {
+            return new Human().setHumanIdent(objectPlayer.strIdent);
+        }
+        /**
+         * 공격받은 사람을 설정합니다.
+         * @param {Human} human 피해자
+         */
+    this.setVictim = function(human) {
+            if (human instanceof Human) objectPlayer = human.getHumanIdent();
+            return this;
+        }
+        /**
+         * 공격의 데미지를 반환합니다.
+         * @return {Number} 데미지
+         */
+    this.getDamage = function() {
+            return damage;
+        }
+        /**
+         * 공격의 데미지를 설정합니다.
+         * @param {Number} d 데미지
+         */
+    this.setDamage = function(d) {
+            if (isNaN(d)) return this;
+            damage = parseInt(d);
+            return this;
+        }
+        /**
+         * 아이템의 이름을 받아옵니다.
+         * @return {String} 아이템 이름
+         */
+    this.getItemName = function() {
+            return objectItem.strIdent.split("-")[0];
+        }
+        /**
+         * 아이템의 이름을 설정합니다.
+         * @param {String} name 아이템 이름
+         */
+    this.setItemName = function(name) {
+        let ident = objectItem.strIdent.split("-");
+        ident.splice(0, 1);
+        objectItem.strIdent = name.toString() + "-" + ident;
+    }
+}
+
+/**
+ * PlayerHitEvent를 모든 스크립트에게 전송합니다.
+ * @author Scripter36(1350adwx)
+ * @param  {Object} objectPlayer 피해자
+ * @param  {Object} objectItem   때린 아이템
+ * @param  {Number} damage       데미지
+ * @return {PlayerHitEvent}      PlayerHitEvent
+ */
+exports.callPlayerHitEvent = function(objectPlayer, objectItem, damage) {
+    let event = new exports.PlayerHitEvent(objectPlayer, objectItem, damage);
+    for (let i of exports.scripts) {
+        if (typeof i.onPlayerHit != "undefined") {
+            i.onPlayerHit(event);
+        }
+    }
+    return event;
+}
+
+
+/**
+ * 플레이어가 죽을 때 발동됩니다.
+ * @param {Object} objectPlayer 죽은 사람
+ * @class
+ */
+exports.PlayerDeathEvent = function(objectPlayer) {
+    /** @type {Boolean} */
+    var canceled = false;
+    /**
+     * PlayerDeathEvent를 취소합니다.
+     * @param {Boolean} cancel 취소 여부
+     */
+    this.setCanceled = function(cancel) {
+            if (cancel == undefined) cancel = true;
+            canceled = cancel == true;
+            return this;
+        }
+        /**
+         * PlayerDeathEvent 취소 여부를 반환합니다.
+         * @return {Boolean} 취소 여부
+         */
+    this.isCanceled = function() {
+            return canceled;
+        }
+        /**
+         * 죽은 사람을 반환합니다.
+         * @return {Human} 사람
+         */
+    this.getHuman = function() {
+            return new Human().setHumanIdent(objectPlayer.strIdent);
+        }
+        /**
+         * 죽은 사람을 설정합니다.
+         * @param {Human} human 사람
+         */
+    this.setHuman = function(human) {
+        if (human instanceof Human) objectPlayer = human.getHumanIdent();
+        return this;
+    }
+}
+
+/**
+ * PlayerDeathEvent를 모든 스크립트에게 전송합니다.
+ * @author Scripter36(1350adwx)
+ * @param  {Object} objectPlayer 죽은 사람
+ * @return {PlayerDeathEvent}      PlayerDeathEvent
+ */
+exports.callPlayerDeathEvent = function(objectPlayer) {
+    let event = new exports.PlayerDeathEvent(objectPlayer);
+    for (let i of exports.scripts) {
+        if (typeof i.onPlayerDeath != "undefined") {
+            i.onPlayerDeath(event);
+        }
+    }
+    return event;
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BlockBreakEvent.html">BlockBreakEvent</a></li><li><a href="BlockPlaceEvent.html">BlockPlaceEvent</a></li><li><a href="Human.html">Human</a></li><li><a href="PlayerChatEvent.html">PlayerChatEvent</a></li><li><a href="PlayerDeathEvent.html">PlayerDeathEvent</a></li><li><a href="PlayerHitEvent.html">PlayerHitEvent</a></li><li><a href="PlayerLoginEvent.html">PlayerLoginEvent</a></li><li><a href="PlayerQuitEvent.html">PlayerQuitEvent</a></li></ul><h3>Global</h3><ul><li><a href="global.html#callBlockBreakEvent">callBlockBreakEvent</a></li><li><a href="global.html#callBlockPlaceEvent">callBlockPlaceEvent</a></li><li><a href="global.html#callPlayerChatEvent">callPlayerChatEvent</a></li><li><a href="global.html#callPlayerDeathEvent">callPlayerDeathEvent</a></li><li><a href="global.html#callPlayerHitEvent">callPlayerHitEvent</a></li><li><a href="global.html#callPlayerLoginEvent">callPlayerLoginEvent</a></li><li><a href="global.html#callPlayerQuitEvent">callPlayerQuitEvent</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#loaded">loaded</a></li><li><a href="global.html#requireFromString">requireFromString</a></li><li><a href="global.html#scripts">scripts</a></li><li><a href="global.html#Server">Server</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Dec 27 2016 15:22:40 GMT+0900 (대한민국 표준시)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
