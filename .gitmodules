@@ -1,0 +1,3 @@
+[submodule "voxedu_voxel_warrior"]
+	path = voxedu_voxel_warrior
+	url = git@github.com:snugifted/voxedu_voxel_warrior.git
